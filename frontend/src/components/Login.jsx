@@ -18,7 +18,6 @@ export default function Login() {
     e.preventDefault();
 
     try{
-      console.log("Login Data:", formData);
       const response = await login({...formData})
       if(response.ok){
         navigate('/')

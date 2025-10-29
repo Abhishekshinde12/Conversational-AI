@@ -4,8 +4,9 @@ from rest_framework import status
 from .serializers import MyTokenObtainPairSerializer, MyUserRegistrationSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
 
 
 class MyUserRegistrationView(generics.CreateAPIView):
@@ -40,12 +41,11 @@ class MyTokenObtainPairView(TokenObtainPairView):
             value=data['refresh_token'],
             httponly=True,
             secure=False, # when send to True, sent only over HTTPS
-            samesite="Strict", # helps prevent CSRF (use 'Lax' if cross-domain)
+            samesite='Lax', # helps prevent CSRF (use 'Lax' if cross-domain)
             max_age=7 * 24 * 60 * 60,  # 7 days
             path="/",  # accessible throughout domain
         )
         print(response)
-
         return response
 
 
@@ -66,8 +66,13 @@ class MyTokenRefreshView(APIView):
             access_token = str(refresh.access_token)
             return Response({"access_token": access_token}, status=status.HTTP_200_OK)
             # getting error 
+        except TokenError:
+            # This is specifically for invalid, malformed, or expired tokens
+            return Response({"detail": "Invalid or expired refresh token."}, status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
-            return Response({"error": "Invalid refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
+            # Catch any other unexpected errors during refresh
+            print(f"Error refreshing token: {e}") # Log the error on the server
+            return Response({"detail": "An error occurred during token refresh."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         
 
@@ -75,5 +80,15 @@ class MyTokenRefreshView(APIView):
 class LogoutView(APIView):
     def post(self, request):
         response = Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
-        response.delete_cookie("refresh_token")
+        response.delete_cookie(
+            key="refresh_token",
+            samesite="Lax", # <--- MATCH THIS TO "Lax"
+            path="/"
+        )
         return response
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def tempFunc(request):
+    return Response({'message' : 'Authenticated User'})
