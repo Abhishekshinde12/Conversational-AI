@@ -6,6 +6,8 @@ import Home  from './components/Home'
 import ProtectedRoutes from './components/ProtectedRoutes'
 import { useEffect } from 'react'
 import useAuthStore from '../store/authStore'
+import Customer from './components/Customer'
+import Representative from './components/Representative'
 
 
 function App() {
@@ -31,10 +33,14 @@ function App() {
         {/* 
           Protected Routes
           is user authenticated then only visible
-        */}
+          */}
         <Route element={<ProtectedRoutes />} >
           <Route path='/' element={<Home />} />
         </Route>
+        
+        <Route path='/customer' element={<Customer />} />
+        <Route path='/representative' element={<Representative />} />
+        
       </Routes>
     </>
   )
