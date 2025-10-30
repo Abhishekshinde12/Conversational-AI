@@ -12,6 +12,7 @@ function App() {
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
   const isAuthLoading = useAuthStore((state) => state.isAuthLoading);
 
+  // initializing the auth state when the user first comes
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]); // Run only once on mount

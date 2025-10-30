@@ -1,18 +1,18 @@
 import { create } from 'zustand'
 
-let isRefreshing = false; // Flag to prevent multiple refresh calls simultaneously
-let refreshPromise = null; // Store the promise of the refresh call
+let isRefreshing = false; // Flag to prevent multiple refresh token calls simultaneously
+let refreshPromise = null; // Store the promise of the refresh token call
 
 const useAuthStore = create((set, get) => ({
 
     // auth details
+    // refreshToken: null, # setted as an Http Only Cookie 
     user: null,
     accessToken: null,
     isAuthenticated: false,
     isAuthLoading: true,
-    // refreshToken: null, # setted as an Http Only Cookie 
 
-    // Helper to sync user to localStorage
+    // Helper to sync user details to localStorage
     _setUserAndPersist: (userData) => {
         set({ user: userData });
         if (userData) {
@@ -22,7 +22,7 @@ const useAuthStore = create((set, get) => ({
         }
     },
 
-
+    // register function to handle the registration of new user
     register: async ({ first_name, last_name, email, password }) => {
         try {
 
@@ -41,6 +41,8 @@ const useAuthStore = create((set, get) => ({
         }
     },
 
+    // to login the users
+    // as user still not authenticate --> no cookie set ---> so no need to send cookie
     login: async ({ email, password }) => {
         try {
             const url = `/auth/token/`
@@ -48,7 +50,6 @@ const useAuthStore = create((set, get) => ({
                 method: "POST",
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
-                // credentials: "include"
             })
 
             if (!response.ok) {
@@ -57,16 +58,17 @@ const useAuthStore = create((set, get) => ({
             }
             
             const data = await response.json()
+
+            // Use helper function
             // Store user in state and localStorage
-            get()._setUserAndPersist(data.user); // Use helper function
-            console.log(data)
+            get()._setUserAndPersist(data.user); 
+
             set({
                 user: {...data.user},
                 accessToken: data.access_token,
                 isAuthenticated: true
             })
 
-            // return true
             return response
         }
         catch (error) {
@@ -75,16 +77,21 @@ const useAuthStore = create((set, get) => ({
         }
     },
 
+    // Function to get new access token when old one expires
     getNewAccessToken: async () => {
-
+        
+        // if multiple calls comes, and we are already processing one
+        // return the earlier promise itself
         if (isRefreshing && refreshPromise) {
             return refreshPromise;
         }
 
+        // else - making first refresh call
+        // mark by isRefreshing = True
         isRefreshing = true;
-
+        
+        // here we send the cookies 
         refreshPromise = (async () => {
-
             try {
                 const url = `/auth/token/refresh/`
                 const response = await fetch(url, {
@@ -117,10 +124,12 @@ const useAuthStore = create((set, get) => ({
                 refreshPromise = null; // clearing promise
             }
         })();
+        // started refresh promise immediately and returning it
         return refreshPromise;
     },
 
-
+    // to initialize the auth when a page refresh happens
+    // the user comes back online
     initializeAuth: async () => {
         const { getNewAccessToken, isAuthenticated } = get();
 
@@ -137,7 +146,7 @@ const useAuthStore = create((set, get) => ({
             // If getNewAccessToken succeeded, now retrieve user from localStorage
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
-                get()._setUserAndPersist(JSON.parse(storedUser)); // Set user from localStorage
+                get()._setUserAndPersist(JSON.parse(storedUser)); // Set user from localStorage to the state
             } else {
                 // This scenario means refresh token worked, but no user data was stored.
                 // It's a valid state if you only store user on explicit login
@@ -153,6 +162,7 @@ const useAuthStore = create((set, get) => ({
         }
     },
 
+    // as we are logging out so no need to provide acess token here
     logout: async () => {
         try {
 
@@ -160,7 +170,6 @@ const useAuthStore = create((set, get) => ({
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 
-                    // 'Authorization': `Bearer ${get().accessToken}`,
                     'Content-Type': 'application/json'
                 },
                 credentials: "include",

@@ -150,13 +150,18 @@ SIMPLE_JWT = {
     "USER_ID_CLAIM": "id"
 }
 
+# when set true cookies will be allowed in the cross-site HTTP request
 CORS_ALLOW_CREDENTIALS = True
+
+# origins which are allowed to make cross site http request
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # your Vite frontend
 ]
+# as for django uses CSRF tokens in certain request, hence to handle them along with CORS, we need to setup this
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
 ]
+# non-standard HTTP headers that are allowed in the requests
 CORS_ALLOW_HEADERS = [
     "accept",
     "accept-encoding",

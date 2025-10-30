@@ -1,14 +1,13 @@
 import React from 'react';
 import useAuthStore from '../../store/authStore';
 import { useNavigate } from 'react-router-dom';
-import api from '../utils/api'; // Import your new api wrapper
+import api from '../utils/api'; // Importing new api wrapper
 
 const Home = () => {
   // Home component now *assumes* it's rendered only if isAuthenticated is true
   // and `user` object is available, thanks to ProtectedRoutes.
   const user = useAuthStore((state) => state.user);
-  const accessToken = useAuthStore((state) => state.accessToken);
-  const logout = useAuthStore((state) => state.logout); // Also need logout here
+  const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -25,17 +24,12 @@ const Home = () => {
 
   const handleClick = async () => {
     try{
-
     const url = `/auth/temp/` // Use proxy path if configured
     const response = await api(url, {
       method: "GET",
       headers: {
         'Content-Type' : 'application/json',
-        // api wrapper auto adds access token
-        // 'Authorization' : `Bearer ${accessToken}`
       },
-      // api wrapper auto adds cookies
-      // credentials: "include" // 'include' is needed to send cookies
     })
     if(response.ok){
       const data = await response.json()
@@ -55,8 +49,7 @@ const Home = () => {
 
   }
 
-  // Defensive check is still a good practice, even if ProtectedRoutes handles most cases
-  // It protects against race conditions or unexpected state changes.
+  // Display Loading data until user data set
   if (!user) {
       return <div>Loading user data...</div>; // Or redirect, though ProtectedRoutes should prevent this usually
   }
@@ -64,10 +57,9 @@ const Home = () => {
 
   return (
     <div>
-      {/* Access user properties directly after the defensive check */}
       <h1>Welcome Home : {user.user_name} {user.user_id}</h1>
       <button onClick={handleClick}>Click Me</button>
-      <button onClick={handleLogout}>Logout</button> {/* Add a logout button */}
+      <button onClick={handleLogout}>Logout</button>
     </div>
   )
 }

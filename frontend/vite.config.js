@@ -4,6 +4,8 @@ import tailwindcss from '@tailwindcss/vite'
 
 
 // https://vite.dev/config/
+// here we can remove the proxy as we have already setted up CORS
+// but just letting it keep
 export default defineConfig({
   plugins: [react(), tailwindcss()],
     server: {

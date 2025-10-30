@@ -22,7 +22,6 @@ class MyTokenObtainPairView(TokenObtainPairView):
         serializer = self.get_serializer(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
-            # serializer.is_valid()
         except Exception as e:
             print(e)
             return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
@@ -45,7 +44,6 @@ class MyTokenObtainPairView(TokenObtainPairView):
             max_age=7 * 24 * 60 * 60,  # 7 days
             path="/",  # accessible throughout domain
         )
-        print(response)
         return response
 
 
@@ -65,7 +63,7 @@ class MyTokenRefreshView(APIView):
             refresh = RefreshToken(refresh_token)
             access_token = str(refresh.access_token)
             return Response({"access_token": access_token}, status=status.HTTP_200_OK)
-            # getting error 
+        # getting error 
         except TokenError:
             # This is specifically for invalid, malformed, or expired tokens
             return Response({"detail": "Invalid or expired refresh token."}, status=status.HTTP_401_UNAUTHORIZED)
@@ -82,7 +80,7 @@ class LogoutView(APIView):
         response = Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
         response.delete_cookie(
             key="refresh_token",
-            samesite="Lax", # <--- MATCH THIS TO "Lax"
+            samesite="Lax", 
             path="/"
         )
         return response

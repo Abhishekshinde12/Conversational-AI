@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .models import MyUser
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    # using email for auth
     username_field = 'email'
 
     # in django self.user => current logged in user or None
@@ -18,7 +19,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
                 'user_id': self.user.email
             }
         }
-        print(user_data)
         return user_data
         
 
@@ -29,14 +29,11 @@ class MyUserRegistrationSerializer(serializers.ModelSerializer):
         model = MyUser
         fields = ('first_name', 'last_name', 'email', 'password')
 
-    # if we don't define custom create function, default create function would save password as it is in the DB
-    # to avoid this creating our own create function
     def create(self, validated_data):
         email = validated_data.pop('email')
         password = validated_data.pop('password')
         # here we use create_user instead of create
-        # as we need to hash the password
-        # if the password is not hashed - then unable to login
-        # and this .create_user here calls our custom manager for the MyUser class
+        # as internally it takes care of normalizing email, setting password hash
+        # it's the custom user models manager method to create new user
         user = MyUser.objects.create_user(email=email, password=password,**validated_data)
         return user

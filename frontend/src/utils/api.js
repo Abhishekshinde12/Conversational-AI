@@ -1,7 +1,6 @@
 // interceptor to auto get new access token when old expires
 // and when refresh token expires - redirect to login
 
-
 import useAuthStore from "../../store/authStore";
 
 const api = async (url, options = {}) => {
@@ -34,6 +33,8 @@ const api = async (url, options = {}) => {
                 ...options.headers,
                 'Authorization': `Bearer ${newAccessToken}`,
             };
+            // also adding a new isRetry property to the options to keep track of whether this is a retry request to get new token
+            // to prevent infinite looping
             options._isRetry = true; // Mark as retry to prevent infinite loops
             response = await fetch(url, options); // Retry the original request
 
