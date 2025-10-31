@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import BaseUserManager
+from django.contrib.auth.models import PermissionsMixin 
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email, password, **extra_fields):
@@ -19,7 +20,7 @@ class MyUserManager(BaseUserManager):
 
 
 # Create your models here.
-class MyUser(AbstractBaseUser):
+class MyUser(AbstractBaseUser, PermissionsMixin):
     username = None 
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True)
     email = models.EmailField(unique=True)
@@ -27,6 +28,7 @@ class MyUser(AbstractBaseUser):
     last_name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
 
     objects = MyUserManager()
     USERNAME_FIELD = 'email'

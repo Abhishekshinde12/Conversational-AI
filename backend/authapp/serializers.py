@@ -16,7 +16,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             'refresh_token': data['refresh'],
             'user': {
                 'user_name': f'{self.user.first_name} {self.user.last_name}',
-                'user_id': self.user.email
+                'user_id': self.user.id
             }
         }
         return user_data

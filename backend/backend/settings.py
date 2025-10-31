@@ -35,6 +35,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # for websocket added daphne
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,7 +46,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
-    'authapp'
+    'authapp',
+    'chat',
 ]
 
 MIDDLEWARE = [
@@ -144,12 +147,14 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(seconds=10),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
     "USER_ID_FIELD": "id",
-    "USER_ID_CLAIM": "id"
+    "USER_ID_CLAIM": "id",
+    "SIGNING_KEY": SECRET_KEY
 }
 
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'localhost:5173', 'localhost:8000']
 # when set true cookies will be allowed in the cross-site HTTP request
 CORS_ALLOW_CREDENTIALS = True
 
@@ -173,3 +178,13 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken",
     "x-requested-with",
 ]
+
+ASGI_APPLICATION = 'backend.asgi.application'
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
