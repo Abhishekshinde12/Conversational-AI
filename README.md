@@ -6,3 +6,5 @@
 - As CORS are already setted up but vite also contains a forward proxy for making cross site request
 - The access token is stored in the store / in-memory and the refresh token as an http only cookie
 - Currently cookies are not signed, if you wan't you can sign the cookie
+- Also the JWT tokens are also not signed
+- Use AbstractUser instead of AbstractBaseUser for user model creation
